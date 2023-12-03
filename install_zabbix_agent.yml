@@ -1,0 +1,106 @@
+---
+
+- name: Intall zabbix agent to a new Linux host
+  hosts: "{{ host }}"
+
+  tasks:
+
+    - name: Upgrade all packages, excluding kernel & foo related packages
+      yum:
+        name: '*'
+        state: latest
+        exclude: kernel*,foo*
+
+    - name: Check if Zabbix agent is installed
+      command: systemctl status zabbix-agent
+      ignore_errors: yes
+      register: zabbix-agent_status
+    
+    - name: Install Zabbix agent
+      yum: 
+        name: zabbix-agent
+        state: present
+
+    - name: Find zabbix_agentd.conf file
+      find:
+        paths: /
+        patterns: "zabbix_agentd.conf"
+        recurse: yes
+      register: config_file
+
+    - name: Set Server in zabbix_agentd.conf
+      lineinfile: 
+        path: "{{ config_file.files[0].path }}"
+        regexp: 'Server='
+        line: 'Server=hetzner-monitor.wee.co.il'
+    
+    - name: Set Server-active
+      lineinfile:
+        path: "{{ config_file.files[0].path }}"
+        regexp: 'ServerActive='
+        line: 'ServerActive=hetzner-monitor.wee.co.il'
+
+    - name: Set Hostname in zabbix_agentd.conf
+      lineinfile:
+        path: "{{ config_file.files[0].path }}"
+        regexp: 'Hostname='
+        line: "Hostname={{ ansible_facts['ansible_hostname'] }}"
+    
+    - name: Slurp psk key from file
+      slurp:
+        src: "{{ playbook_dir }}/psk.txt"
+      register: slurped_psk
+
+    - name: Decode file content from base64
+      set_fact:
+        psk_key: "{{  slurped_psk['content'] | b64decode }}"
+
+    - name: Add TLS PSK for secure connection
+      blockinfile:
+        path: "{{ config_file.files[0].path }}"
+        block: |
+          TLSConnect=psk
+          TLSAccept=psk
+          TLSPSKFile={{ psk_key }}
+          TLSPSKIdentity={{ ansible_facts['ansible_hostname'] }}-PSK01
+    
+    - name: Enable and start zabbix-agent service
+      systemd:
+        name: zabbix-agent
+        enabled: yes
+        state: started
+      register: zabbix_service_status
+    
+    - name: Log zabbix-agent service status to file
+      lineinfile:
+        path: "{{ playbook_dir }}/logs/zabbix_hosts_monitoring_script.log"
+        line: "Zabbix-agent service changed: {{ zabbix_service_status.changed }}, message: {{ zabbix_service_status.msg }}"
+        
+
+
+
+
+    
+
+
+      
+
+
+
+
+
+
+
+
+
+
+
+
+
+    
+
+
+
+...
+
+

@@ -1,0 +1,47 @@
+---
+
+- name: Zabbix new hosts config
+  hosts: localhost
+  gather_facts: true
+  vars: 
+    user: "{{ lookup('env', 'IANNIS_ZABBIX_USERNAME') }}"
+    password: "{{ lookup('env', 'IANNIS_ZABBIX_PASSWORD') }}"
+
+  tasks:
+
+    - name: Generate PSK key
+      shell: "openssl rand -hex 32"
+      register: psk_key
+    
+    - name: Save psk key to a file with overwright
+      copy:
+        content: "{{ psk_key.stdout }}"
+        dest: "{{ playbook_dir }}/auth/psk.txt"
+        force: yes
+
+    - name: Create Zabbix hosts
+      local_action:
+        module: zabbix_host
+        server_url: https://hetzner-monitor.wee.co.il/zabbix
+        login_user: "{{ user }}"
+        login_password: "{{ password }}"
+        host_name: "{{ host_name }}"
+        visible_name: "{{ visible_name }}"
+        host_groups: "{{ host_groups }}"
+        interfaces: 
+          - type: 1
+            main: 1
+            useip: 1
+            ip: "{{ ip }}"
+            dns: ""
+            port: 10050
+        proxy: "{{ proxy }}"
+        link_templates: "{{ link_templates }}"
+        status: enabled
+        state: present
+        tls_accept: 2
+        tls_connect: 2
+        tls_psk: "{{ psk_key.stdout }}"
+        tls_psk_identity: "{{ host_name }}-PSK01"
+
+...

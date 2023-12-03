@@ -1,0 +1,28 @@
+{
+    "and": [
+      {
+        "attr": "status.value",
+        "value": "active"
+      },
+      {
+        "attr": "primary_ip.address",
+        "value": ".",
+        "op": "contains"
+      },
+      {
+        "attr": "name",
+        "value": "",
+        "negate": true
+      },
+      {
+        "attr": "platform.name",
+        "value": "",
+        "negate": true
+      },
+      {
+        "attr": "custom_fields.VM_hostname",
+        "value": "",
+        "negate": true
+      }
+    ]
+}
