@@ -4,8 +4,8 @@
   hosts: localhost
   gather_facts: true
   vars: 
-    user: "{{ lookup('env', 'IANNIS_ZABBIX_USERNAME') }}"
-    password: "{{ lookup('env', 'IANNIS_ZABBIX_PASSWORD') }}"
+    user: "{{ lookup('env', 'ZABBIX_USERNAME') }}"
+    password: "{{ lookup('env', 'ZABBIX_PASSWORD') }}"
 
   tasks:
 
