@@ -292,6 +292,17 @@ def handle_connection(client_socket):
             return
     except Exception as e:
         logging.info(f"Tags retrieve failed with error: {e}")
+    
+    # Exclude Test cluster from processing
+    try:
+        cluster_name = netbox_host.get("cluster", {}).get("name")
+        if test in cluster_name.lower():
+            logging.error("VM is in Test cluster, no need to process")
+            response = ("HTTP/1.1 400 Bad Request\r\n\r\n")
+            client_socket.sendall(response.encode())
+            return
+    except Exception as e:
+        logging.info(f"Cluster name retrieve failed with error: {e}")
         
     if ip_address and netbox_host.get("data", {}).get("status", {}).get("value").lower() == "active":
 
