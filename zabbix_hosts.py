@@ -296,7 +296,7 @@ def handle_connection(client_socket):
     # Exclude Test cluster from processing
     try:
         cluster_name = netbox_host.get("cluster", {}).get("name")
-        if test in cluster_name.lower():
+        if "test" in cluster_name.lower():
             logging.error("VM is in Test cluster, no need to process")
             response = ("HTTP/1.1 400 Bad Request\r\n\r\n")
             client_socket.sendall(response.encode())
