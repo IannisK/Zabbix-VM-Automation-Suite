@@ -270,6 +270,8 @@ def handle_connection(client_socket):
     templates = []
     groups = []
 
+    logging.info(json.dumps(netbox_host, indent=4))
+
     # IP address set with netmask discard if there is one
     try:
         ip_address = netbox_host.get("data", {}).get("primary_ip", {}).get("address")
@@ -278,7 +280,19 @@ def handle_connection(client_socket):
     except Exception as e:
         logging.info(f"IP address retrieve failed with error: {e}")
         return
-
+        
+    # Exclude Test cluster from processing
+    try:
+        cluster = netbox_host.get("data", {}).get("cluster")
+        logging.info(f"Cluster retrieve successfully: {cluster.get('name')}")
+        if cluster and "test" in cluster.get("name", "").lower():
+            logging.error("VM is in Test cluster, no need to process")
+            response = ("HTTP/1.1 400 Bad Request\r\n\r\n")
+            client_socket.sendall(response.encode())
+            return
+    except Exception as e:
+        logging.info(f"Error while processing cluster information: {e}")
+    
     # Tags set
     try:
         tags_data = netbox_host.get("data", {}).get("tags", [])
@@ -292,17 +306,6 @@ def handle_connection(client_socket):
             return
     except Exception as e:
         logging.info(f"Tags retrieve failed with error: {e}")
-    
-    # Exclude Test cluster from processing
-    try:
-        cluster = netbox_host.get("cluster")
-        if cluster and "test" in cluster.get("name", "").lower():
-            logging.error("VM is in Test cluster, no need to process")
-            response = ("HTTP/1.1 400 Bad Request\r\n\r\n")
-            client_socket.sendall(response.encode())
-            return
-    except Exception as e:
-        logging.info(f"Error while processing cluster information: {e}")
         
     if ip_address and netbox_host.get("data", {}).get("status", {}).get("value").lower() == "active":
 
@@ -351,9 +354,9 @@ def handle_connection(client_socket):
         # Extract the location information and set "proxy" variable
         if ip_address.startswith("172."): 
                     if "pluto-vcenter" in location: 
-                        proxy = "80.178.113.59"
-                    elif "jupiter-vcenter" in location:
                         proxy = "62.90.18.89"
+                    elif "jupiter-vcenter" in location:
+                        proxy = "80.178.113.59"
         else: 
             proxy = ""
             # Check if the IP address exists in Zabbix
