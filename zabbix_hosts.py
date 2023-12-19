@@ -270,7 +270,7 @@ def handle_connection(client_socket):
     templates = []
     groups = []
 
-    logging.info(json.dumps(netbox_host, indent=4))
+#    logging.info(json.dumps(netbox_host, indent=4))
 
     # IP address set with netmask discard if there is one
     try:
@@ -297,6 +297,7 @@ def handle_connection(client_socket):
     try:
         tags_data = netbox_host.get("data", {}).get("tags", [])
         tags = [tag["name"].lower() for tag in tags_data] # Creates array from "name" fields in tag_data dictionary
+        logging.info("Tags retrieved successfully")
         # Check if the virtual machine is in an orphaned state (indicating that it will be shut down and should not proceed)
         if "orphaned" in tags: 
             logging.error("VM is in orphaned state, no need to process")
