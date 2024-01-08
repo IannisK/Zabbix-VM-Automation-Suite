@@ -330,6 +330,8 @@ def handle_connection(client_socket):
             # Additional check for cPanel mentions in the name to append backup monitoring
             if " cp " in visible_name.lower() or "cpanel" in visible_name.lower() or re.search(r"cp\d{2}", visible_name.lower()):
                 templates.append("template cPanel backup")
+                groups.append("cPanels")
+                logging.info("cPanel template and groups appended")
         else: 
             logging.error(f"There are no matches with the platform type")
             logging.info("Connection closed")
