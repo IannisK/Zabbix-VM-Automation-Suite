@@ -9,6 +9,7 @@ import sys
 import os
 import re
 import subprocess
+import time
 from zabbix_auth import zabbix_authentication
 
 templates_with_id = []
@@ -351,7 +352,13 @@ def handle_connection(client_socket):
                 logging.info("cPanel template and group appended")   
 
         host_name = netbox_host.get("data", {}).get("custom_fields", {}).get("vcsa_vm_guest_hostname")
-        logging.info(f"Hostname retrieved successfully")
+        if host_name is not None:
+            logging.info(f"Hostname retrieved successfully")
+        else: 
+            # Get Unix timestamp as an integer and assign to a hostname
+            host_name = "rand_hostname-" + int(time.time()) 
+            logging.info("Hostname is empty, generated hostname assigned")
+        
         location = netbox_host.get("data", {}).get("site", {}).get("name").lower()       
 
         # Extract the location information and set "proxy" variable
