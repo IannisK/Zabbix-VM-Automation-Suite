@@ -355,9 +355,9 @@ def handle_connection(client_socket):
         if host_name is not None:
             logging.info(f"Hostname retrieved successfully")
         else: 
-            # Get Unix timestamp as an integer and assign to a hostname
-            host_name = "rand_hostname-" + int(time.time()) 
-            logging.info("Hostname is empty, generated hostname assigned")
+            # Set visible name as a hostname
+            host_name = visible_name
+            logging.info("Hostname is empty, visible name assigned as hostname")
         
         location = netbox_host.get("data", {}).get("site", {}).get("name").lower()       
 
