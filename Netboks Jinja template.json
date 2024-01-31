@@ -18,11 +18,6 @@
         "attr": "platform.name",
         "value": "",
         "negate": true
-      },
-      {
-        "attr": "custom_fields.VM_hostname",
-        "value": "",
-        "negate": true
       }
     ]
 }
