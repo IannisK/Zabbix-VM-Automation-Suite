@@ -48,7 +48,7 @@ def zabbix_authentication():
                 f.write(auth_parsed['result'])
                 return True
         else: 
-            logging.info(f"{zabbix_username}, {zabbix_password}")
+#            logging.info(f"{zabbix_username}, {zabbix_password}")
             logging.critical(f"Authentication failed with error: {json.dumps(auth_parsed['error'], indent=4)}")
             return False            
     except requests.RequestException as exception:
